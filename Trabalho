@@ -1,0 +1,907 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+//
+//Aqui é feita a definição dos struct, procedimentos e defines necessários para o código
+void menu();
+void cadastra_usina();
+void verifica_usina();
+#define TAM_CNPJ 19
+#define TAMNOME_USINA 1001
+#define TAM_DATA 10
+#define TAM_POTENCIA 100
+void cadastra_consumidor();
+void verifica_consumidor();
+#define TAM_ID 19
+#define TAM_NOME 1001
+void cadastra_contrato();
+void verifica_contrato();
+#define TAM_CNPJCONTRATO 19
+#define TAM_IDCONSUMIDOR 16
+#define TAM_DATACONTRATO 10
+void consulta_usina();
+void consulta_consumidor();
+void exclui_usina();
+void exclui_consumidor();
+void exclui_contrato();
+//
+//Aqui sera realizada a chamada inicial para o menu, repetido em todos os procedimentos
+int main(void) {
+  menu();
+  return 0;
+}
+//
+void menu(){
+//do{}while que permitira o loop do menu que irá para cada uma das funções
+    int n;
+    printf("Menu  de Opçoes\n1) Cadastrar Usina\n2) Cadastrar Consumidor\n3) Cadastrar Contrato entre Consumidor e Usina\n4) Consultar Usina Cadastrada\n5) Consultar Consumidor Cadastrado\n6) Excluir Usina\n7) Excluir Consumidor\n8) Encerrar Programa\n");
+    scanf("%d",&n);
+ do{if(n==1){
+    printf("Redirecionando para o Cadastro de Usina\n");
+    cadastra_usina();
+    break;
+  }else if(n==2){
+    printf("Redirecionando para o Cadastro de Consumidor\n");
+    cadastra_consumidor();
+    break;  
+  }else if(n==3){
+    printf("Redirecionando para o Cadastro de Contrato\n");
+    cadastra_contrato();
+    break;
+  }else if(n==4){
+    printf("Redirecionando para a Consulta de Usina\n");
+    consulta_usina();
+    break;
+  }else if(n==5){
+    printf("Redirecionando para a Consulta de Consumidor\n");
+    consulta_consumidor();
+    break;
+  }else if(n==6){
+    printf("Redirecionando para a Exclusão de Usina\n");
+    exclui_usina();
+    break;
+  }else if(n==7){
+    printf("Redirecionando para a Exclusão de Consumidor\n");
+    exclui_consumidor();
+    break;
+  }else if(n==8){
+    printf("Encerrando o Programa\n");
+    break;
+  }else{
+    printf("Valor Indevido, Encerrando Programa\n");
+    break;
+  }
+}while(n<=8);
+}
+struct usina{
+//Struct para a as variaveis a usina
+  char cnpj[TAM_CNPJ];
+  char nome_usina[TAMNOME_USINA];
+  char data_inicio[TAM_DATA];
+  float potencia_estimada;
+}USINA;
+void cadastra_usina(int n){
+//Foi realizado o cadastro da usina criado um arquivo txt e salvando os dados da struxt atraves do fprintf
+  struct usina N;
+  FILE *usinas;
+  usinas= fopen("usinas_cadastradas.txt","a+");
+  fclose(usinas);
+  printf("O arquivo foi criado com sucesso!\n");
+  //
+  usinas= fopen("usinas_cadastradas.txt","a");
+  //
+  printf("Digite o CNPJ\n");
+  scanf("%s",&N.cnpj[TAM_CNPJ]);
+  fprintf(usinas, "%s\n",&N.cnpj[TAM_CNPJ]);
+  //
+  printf("Digite o nome da usina\n");
+  __fpurge(stdin);
+  scanf("%[^\n]",&N.nome_usina[TAMNOME_USINA]);
+  fprintf(usinas,"%s\n",&N.nome_usina[TAMNOME_USINA]);
+  //
+  printf("Digite a data de inicio das operações\n");
+  scanf("%s",&N.data_inicio[TAM_DATA]);
+  fprintf(usinas, "%s\n",&N.data_inicio[TAM_DATA]);
+  //
+  printf("Digite a potencia estimada\n");
+  scanf("%f",&N.potencia_estimada);
+  fprintf(usinas, "%2.f\n",N.potencia_estimada);
+  //Chamada para o vericador de dados, que permitira identificar e excluir os dados incorretos
+  verifica_usina(n);
+  fclose(usinas);
+  printf("Os dados foram salvos no arquivo com sucesso\n");
+  main();
+}
+struct pessoa{
+//Variaveis relacionadas ao consumidor
+  char id[TAM_ID];
+  char nome[TAM_NOME];
+};
+void cadastra_consumidor(int n){
+//Foi realizado o cadastro do consumidor criado um arquivo txt e salvando os dados da struxt atraves do fprintf
+  struct pessoa P;
+  FILE *pessoas;
+  pessoas= fopen("pessoas_cadastradas.txt","a+");
+  fclose(pessoas);
+  printf("O arquivo foi criado com sucesso!\n");
+  //
+  pessoas= fopen("pessoas_cadastradas.txt","a");
+  //
+  printf("Digite o CNPJ ou CPF\n");
+  scanf("%s",&P.id[TAM_ID]);
+  fprintf(pessoas, "%s\n",&P.id[TAM_ID]);
+  //
+  printf("Digite o nome do Consumidor\n");
+  __fpurge(stdin);
+  scanf("%[^\n]",&P.nome[TAM_NOME]);
+  fprintf(pessoas,"%s\n",&P.nome[TAM_NOME]);
+  //
+  //chama-se a funcao verifica, que permitira descobrir se os dados estão corretos e excluir os incorretos
+  verifica_consumidor(n);
+  fclose(pessoas);
+  printf("Os dados foram salvos no arquivo com sucesso\n");
+  main();
+}
+struct contrato{
+//Variaveis relacionadas aos contratos
+char cnpj_usina[TAM_CNPJCONTRATO];
+char id_consumidor[TAM_IDCONSUMIDOR];
+char data_iniciocontrato[TAM_DATACONTRATO];
+float potencia_contratada;
+};
+void cadastra_contrato(int n){
+//Foi realizado o cadastro do contrato criado um arquivo txt e salvando os dados da struxt atraves do fprintf
+  struct contrato C;
+  FILE*contratos;
+  contratos=fopen("contratos_cadastrados.txt","a+");
+  if(!feof(contratos)){
+    printf("Arquivo criado com sucesso\n");
+  }
+  fclose(contratos);
+  contratos=fopen("contratos_cadastrados.txt","a");
+  rewind(contratos);
+  //
+  printf("Digite o CNPJ da usina contratada:\n");
+  scanf("%s",C.cnpj_usina);
+  fprintf(contratos,"%s\n",C.cnpj_usina);
+  //
+  printf("Digite o id do consumidor contratante:\n");
+  scanf("%s",C.id_consumidor);
+  fprintf(contratos,"%s\n",C.id_consumidor);
+  //
+  printf("Digite a data de inicio do contrato:\n");
+  scanf("%s",C.data_iniciocontrato);
+  fprintf(contratos,"%s\n",C.data_iniciocontrato);
+  //
+  printf("Digite a potencia que foi contratada:\n");
+  scanf("%f",&C.potencia_contratada);
+  fprintf(contratos,"%2.f\n",C.potencia_contratada);
+  //
+  //Chamado do verificador de dados, que permite excluir apenas contratos
+  verifica_contrato();
+  fclose(contratos);
+  printf("Os dados foram salvos no arquivo com sucesso\n");
+  main();
+}
+void consulta_usina(int n){
+  struct usina N;
+  char busca_usina[100];
+  int i,e;
+  i=2;
+  float pt,p1;
+  e=1;
+  p1=0;
+  pt=0;
+  FILE*usinas;
+  struct contrato C;
+  FILE*contratos;
+ //Chamada das structs em questão, das variaveis e arquivos
+ //Abertura do arquivo das usinas para leitura
+  printf("Digite o CNPJ da usina a ser consultada:\n");
+  scanf("%s",busca_usina);
+  usinas=fopen("usinas_cadastradas.txt","r");
+  rewind(usinas);  
+//While que vai ler os dados do arquivo até o fim desse, a strstr retornara i=0 se achar a usina que está sendo buscada
+  while(!feof(usinas)){
+    fscanf(usinas,"%s\n",N.cnpj);
+    if(strstr(busca_usina,N.cnpj)!=NULL){
+      i=0;
+      break;
+    }else{
+      i=1;
+    }
+  }
+ //Se i==0 vai printar os dados da empresa buscada, se i==1 mostrará que a empresa não existe
+  if(i==0){
+    printf("CNPJ da usina consultada: %s\n",N.cnpj);
+    fscanf(usinas,"%[^\n]\n",N.nome_usina);
+    printf("Nome da usina consultada: %s\n",N.nome_usina);
+    fscanf(usinas,"%s\n",N.data_inicio);
+    printf("Data de inicio das operações da usina pesquisada: %s\n",N.data_inicio);
+    fscanf(usinas,"%f\n",&N.potencia_estimada);
+    printf("Potencia estimada da usina consultada: %2.f\n",N.potencia_estimada);
+    p1=N.potencia_estimada;
+  }else{
+    printf("A usina não existe\n");
+  }
+  fclose(usinas);
+  printf("Buscando contratos, por favor aguarde...\n");
+  //
+ //Se repetira o processo das usinas para os contratos, retirando break para ler todas que tiver o cnpj em questão no campo da usina
+  contratos=fopen("contratos_cadastrados.txt","r");
+   
+  while(!feof(contratos)){
+    fscanf(contratos,"%s",C.cnpj_usina);
+    fscanf(contratos,"%s",C.id_consumidor);
+    fscanf(contratos,"%s",C.data_iniciocontrato);
+    fscanf(contratos,"%f",&C.potencia_contratada);
+    if(strstr(busca_usina,C.cnpj_usina)!=0){
+        printf("CPF/CNPJ do Consumidor: %s\n",C.id_consumidor);
+        printf("Data de inicio do contrato: %s\n",C.data_iniciocontrato);
+        printf("Potencia contratada:%2.f\n",C.potencia_contratada);
+        pt=p1-C.potencia_contratada;
+        printf("Potencia restante:%2.f\n",pt);
+        e=0;
+    }
+  }
+  if(e=1){
+    printf("Não existem contratos para essa usina\n"); 
+  }
+  fclose(contratos);
+  main();
+}
+void consulta_consumidor(int n){
+  struct pessoa P;
+  struct contrato C;
+  char busca_consumidor[100];
+  int i,e;
+  i=2;
+  e=1;
+  FILE*contratos;
+  FILE*pessoas;
+ //Chamada das structs em questão, das variaveis e arquivos
+ //Abertura do arquivo dos consumidores para leitura
+  printf("Digite o CNPJ/CPF do consumidor a ser consultado:\n");
+  scanf("%s",busca_consumidor);
+  pessoas=fopen("pessoas_cadastradas.txt","r");
+  rewind(pessoas); 
+//While que vai ler os dados do arquivo até o fim desse, a strstr retornara i=0 se achar o consumidor que está sendo buscada
+  while(!feof(pessoas)){
+    fscanf(pessoas,"%s\n",P.id);
+    if(strstr(busca_consumidor,P.id)!=NULL){
+      i=0;
+      break;
+    }else{
+      i=1;
+    }
+  }
+  //Se i==0 vai printar os dados da empresa buscada, se i==1 mostrará que o consumidor não existe
+  if(i==0){
+    printf("CNPJ/CPF da pessoa consultada: %s\n",P.id);
+    fscanf(pessoas,"%[^\n]\n",P.nome);
+    printf("Nome da pessoa consultada: %s\n",P.nome);
+  }else{
+    printf("A pessoa não existe\n");
+  }
+  fclose(pessoas);
+  //Se repetira o processo dos consumidores para os contratos, retirando break para ler todas que tiver o cnpj em questão no campo do consumidor
+  contratos=fopen("contratos_cadastrados.txt","r");
+  while(!feof(contratos)){
+    fscanf(contratos,"%s",C.cnpj_usina);
+    fscanf(contratos,"%s",C.id_consumidor);
+    fscanf(contratos,"%s",C.data_iniciocontrato);
+    fscanf(contratos,"%f",&C.potencia_contratada);
+    if(strstr(busca_consumidor,C.id_consumidor)==0){
+        printf("CPF/CNPJ da usina: %s\n",C.cnpj_usina);
+        printf("Data de inicio do contrato: %s\n",C.data_iniciocontrato);
+        printf("Potencia contratada:%2.f\n",C.potencia_contratada);
+        e=0;
+    }
+  }
+  if(e=1){
+    printf("Não existem contratos para essa pessoa\n");
+  }
+  fclose(contratos);
+  main();
+}
+void exclui_usina(int n){
+//Abertura das variaveis structs, variaveis e arquivos
+  struct usina N;
+  struct contrato C;
+  char busca_usina[100];
+  int i,e,a;
+  i=1;
+  e=1;
+  a=0;
+  FILE*usinas;
+  FILE*copia;
+  FILE*contratos;
+  FILE*copia1;
+//Sera digitado o cnpj a ser buscado e serão abertos os arquivos 
+  printf("Digite o CNPJ da usina a ser deletada:\n");
+  scanf("%s",busca_usina);
+  usinas=fopen("usinas_cadastradas.txt","r+");
+  copia=fopen("copiausinas_cadastradas.txt","a+");
+  rewind(usinas);  
+//While que buscará esse valor, printando os dados que não conterem ele em um arquivo copia
+  while(!feof(usinas)){
+    fscanf(usinas,"%s\n",N.cnpj);
+    fscanf(usinas,"%[^\n]\n",N.nome_usina);
+    fscanf(usinas,"%s\n",N.data_inicio);
+    fscanf(usinas,"%f\n",&N.potencia_estimada);
+    a=a+1;
+    if(strstr(busca_usina,N.cnpj)==NULL){ 
+      i=0;
+      fprintf(copia,"%s\n",N.cnpj);
+      fprintf(copia,"%s\n",N.nome_usina);
+      fprintf(copia,"%s\n",N.data_inicio);
+      fprintf(copia,"%2.f\n",N.potencia_estimada); 
+    }
+  }
+ //Excluirá o arquivo original se o copia tiver conteudo renomeando o anterior. Se somente o valor a ser excluido existir no arquivo irá excluir o abrindo em w
+  if(i==1 && a!=1){
+    printf("A usina não existe\n");
+    remove("copiausinas_cadastradas.txt");
+  }else if(a==1 && i==1){
+    usinas=fopen("usinas_cadastradas.txt","w");
+    remove("copiausinas_cadastradas.txt");
+  }else{
+    usinas=fopen("usinas_cadastradas.txt","w");
+    fclose(usinas);
+    usinas=fopen("usinas_cadastradas.txt","a+");
+    rewind(copia);
+    rewind(usinas);
+    fclose(usinas);
+    rename("copiausinas_cadastradas.txt","usinas_cadastradas.txt");
+  }
+  fclose(copia);
+  //
+  //Irá repetir esse processo com os contratos 
+  a=0;
+  copia1=fopen("copiacontratos_cadastrados.txt","a+");  
+  contratos=fopen("contratos_cadastrados.txt","r+");
+  while(!feof(contratos)){
+    fscanf(contratos,"%s",C.cnpj_usina);
+    fscanf(contratos,"%s",C.id_consumidor);
+    fscanf(contratos,"%s",C.data_iniciocontrato);
+    fscanf(contratos,"%f",&C.potencia_contratada);
+    a=a+1;
+    if(strstr(busca_usina,C.cnpj_usina)==NULL){
+      fprintf(copia1,"%s\n",C.cnpj_usina);
+      fprintf(copia1,"%s\n",C.id_consumidor);
+      fprintf(copia1,"%s\n",C.data_iniciocontrato);
+      fprintf(copia1,"%2.f\n",C.potencia_contratada);
+      e=0;
+    }else{
+      e=2;    
+    }
+  }
+  if(e==1 && a!=1){
+    printf("Não existem contratos para essa usina\n");
+    remove("copiacontratos_cadastrados.txt");
+  }else if(a==1 && e==1){
+    contratos=fopen("contratos_cadastrados.txt","w");
+    remove("copiacontratos_cadastrados.txt");
+  }else{
+    contratos=fopen("contratos_cadastrados.txt","w");
+    fclose(contratos);
+    contratos=fopen("contratos_cadastrados.txt","a+");
+    fclose(contratos);
+    rename("copiacontratos_cadastrados.txt","contratos_cadastrados.txt");
+    fclose(copia1);
+  }
+  main();
+}
+void exclui_consumidor(int n){
+//Abertura das variaveis structs, variaveis e arquivos
+  char busca_consumidor[100];
+  int a,i,e;
+  i=1;
+  e=1;
+  a=0;
+  FILE*pessoas;
+  FILE*contratos;
+  FILE*copia;
+  FILE*copia1;
+  struct pessoa P;
+  struct contrato C;
+  //Sera digitado o cnpj a ser buscado e serão abertos os arquivos 
+  printf("Digite o CNPJ/CPF do consumidor a ser deletado:\n");
+  scanf("%s",busca_consumidor);
+  pessoas=fopen("pessoas_cadastradas.txt","r+");
+  copia=fopen("copiapessoas_cadastradas.txt","a+");
+  rewind(pessoas);  
+ //While que buscará esse valor, printando os dados que não conterem ele em um arquivo copia
+  while(!feof(pessoas)){
+    fscanf(pessoas,"%s\n",P.id);
+    fscanf(pessoas,"%[^\n]\n",P.nome);
+    a=a+1;
+    if(strstr(busca_consumidor,P.id)==NULL){
+      fprintf(copia,"%s\n",P.id);
+      fprintf(copia,"%s\n",P.nome);
+      i=0;
+    }else{
+    
+    }
+  }
+   //Excluirá o arquivo original se o copia tiver conteudo renomeando o anterior. Se somente o valor a ser excluido existir no arquivo irá excluir o abrindo em w
+  if(i==1 && a!=1){
+    printf("Essa pessoa não existe\n");
+    remove("copiapessoas_cadastradas.txt");
+  }else if(i==1 && a==1){
+    pessoas=fopen("pessoas_cadastradas.txt","w");
+    remove("copiapessoas_cadastradas.txt"); 
+  }else{
+  pessoas=fopen("pessoas_cadastradas.txt","w");
+  fclose(pessoas);
+  fclose(copia);
+  pessoas=fopen("pessoas_cadastradas.txt","a+");
+  copia=fopen("copiapessoas_cadastradas.txt","r+");
+  rewind(copia);
+  rewind(pessoas);
+  fclose(pessoas);
+  rename("copiapessoas_cadastradas.txt","pessoas_cadastradas.txt");
+  fclose(copia);
+  }
+  //Irá repetir esse processo com os contratos
+  a=0;
+  copia1=fopen("copiacontratos_cadastrados.txt","a+");  
+  contratos=fopen("contratos_cadastrados.txt","r+");
+  while(!feof(contratos)){
+    fscanf(contratos,"%s",C.cnpj_usina);
+    fscanf(contratos,"%s",C.id_consumidor);
+    fscanf(contratos,"%s",C.data_iniciocontrato);
+    fscanf(contratos,"%f",&C.potencia_contratada);
+    a=a+1;
+    if(strstr(busca_consumidor,C.id_consumidor)==NULL){
+      fprintf(copia1,"%s\n",C.cnpj_usina);
+      fprintf(copia1,"%s\n",C.id_consumidor);
+      fprintf(copia1,"%s\n",C.data_iniciocontrato);
+      fprintf(copia1,"%2.f\n",C.potencia_contratada);
+      e=0;
+  }
+  if(e==0){
+    contratos=fopen("contratos_cadastrados.txt","w");
+    fclose(contratos);
+    fclose(copia1);
+    contratos=fopen("contratos_cadastrados.txt","a+");
+    copia1=fopen("copiacontratos_cadastrados.txt","r+"); 
+    fclose(contratos);
+    rename("copiacontratos_cadastrados.txt","contratos_cadastrados.txt");
+    fclose(copia1);
+  }else if(e==1 && a!=1){
+    printf("Não existem contratos para essa pessoa\n");
+    remove("copiacontratos_cadastrados.txt");
+  }else if(e==1 && a==1){
+    contratos=fopen("contratos_cadastrados.txt","w");
+    remove("copiacontratos_cadastrados.txt");
+  }
+  main();
+}
+}
+void exclui_contrato(){
+//Abertura das variaveis structs, variaveis e arquivos  
+  struct usina N;
+  struct contrato C;
+  char busca_usina[100];
+  int i,e,a;
+  i=1;
+  a=0;
+  FILE*usinas;
+  FILE*copia;
+  FILE*contratos;
+  FILE*copia1;
+  //Sera digitado o cnpj a ser buscado e serão abertos os arquivos
+  printf("Digite o CNPJ do contrato a ser deletada:\n");
+  scanf("%s",busca_usina);
+  copia1=fopen("copiacontratos_cadastrados.txt","a+");  
+  contratos=fopen("contratos_cadastrados.txt","r+");
+ //While que buscará esse valor, printando os dados que não conterem ele em um arquivo copia
+  while(!feof(contratos)){
+    fscanf(contratos,"%s",C.cnpj_usina);
+    fscanf(contratos,"%s",C.id_consumidor);
+    fscanf(contratos,"%s",C.data_iniciocontrato);
+    fscanf(contratos,"%f",&C.potencia_contratada);
+    a=a+1;
+    if(strstr(busca_usina,C.cnpj_usina)==NULL){
+      fprintf(copia1,"%s\n",C.cnpj_usina);
+      fprintf(copia1,"%s\n",C.id_consumidor);
+      fprintf(copia1,"%s\n",C.data_iniciocontrato);
+      fprintf(copia1,"%2.f\n",C.potencia_contratada);
+      e=0;
+    }else{
+      e=2;    
+    }
+  }
+  //Excluirá o arquivo original se o copia tiver conteudo renomeando o anterior. Se somente o valor a ser excluido existir no arquivo irá excluir o abrindo em w
+  if(e==1 && a!=1){
+    printf("Não existem contratos para essa usina\n");
+    remove("copiacontratos_cadastrados.txt");
+  }else if(a==1 && e==1){
+    contratos=fopen("contratos_cadastrados.txt","w");
+    remove("copiacontratos_cadastrados.txt");
+  }else{
+    contratos=fopen("contratos_cadastrados.txt","w");
+    fclose(contratos);
+    contratos=fopen("contratos_cadastrados.txt","a+");
+    fclose(contratos);
+    rename("copiacontratos_cadastrados.txt","contratos_cadastrados.txt");
+    fclose(copia1);
+  }
+  main();
+}
+void verifica_usina(int n){
+//Abertura das variaveis structs, variaveis e arquivos
+    FILE*usinas;
+    FILE*copia;
+    struct usina N;
+    int sm, i, r, num, mult;
+    char dig13, dig14;
+    int vdata,vcnpj,viguais,vpotencia;
+    int dia,mes,ano,a;
+    char cnpj_1[TAM_CNPJCONTRATO],cnpj_potencia[TAM_CNPJCONTRATO];
+    a=0;
+    char data[TAM_DATA];
+    printf("Verificando Dados\n");
+    usinas=fopen("usinas_cadastradas.txt","r+");
+    rewind(usinas);
+//Aqui seram lidos os valores cadastrados, verificando se estão ou não corretos, indicando o cnpj do valor indevido e o direcionando para exclusão desse
+    while(!feof(usinas)){
+        fscanf(usinas,"%s\n",N.cnpj);
+        fscanf(usinas,"%[^\n]\n",N.nome_usina);
+        fscanf(usinas,"%s\n",N.data_inicio);
+        fscanf(usinas,"%f\n",&N.potencia_estimada);
+        //Validação do CNPJ
+        sm = 0; mult = 2;
+        for (i=11; i>=0; i--) {
+            num = N.cnpj[i] - 48;	
+            sm = sm + (num * mult);
+            mult = mult + 1;
+            if (mult == 10){
+                mult = 2;
+            }
+        }
+         r = sm % 11;
+        if ((r == 0) || (r == 1)){
+            dig13 = '0';
+        }else{
+            dig13 = (11 - r) + 48;
+        }
+        sm = 0; mult = 2;
+        for (i=12; i>=0; i--) {
+            num = N.cnpj[i] - 48;
+            sm = sm + (num * mult);
+            mult = mult + 1;
+            if (mult == 10){
+                mult = 2;
+            }  
+        }
+         r = sm % 11;
+        if ((r == 0) || (r == 1)){
+            dig14 = '0';
+        }else{
+            dig14 = (11 - r) + 48;
+        }
+        if ((dig13 == N.cnpj[12]) && (dig14 == N.cnpj[13])){
+            printf("O CNPJ informado eh válido.\n");
+        }else{
+            printf("O CNPJ informado eh inválido.\n");
+            printf("Exclua a usina de CNPJ:%s\n",N.cnpj);
+            exclui_usina(n);
+        }
+        i=0;
+        //Validação da data
+        dia=atoi(N.data_inicio);
+        mes=atoi(N.data_inicio+3);
+        ano=atoi(N.data_inicio+6);
+        if ((dia >= 1 && dia <= 31) && (mes >= 1 && mes <= 12) && (ano >= 1985 && ano <= 2022)){
+            if ((dia == 29 && mes == 2) && (((ano % 4) == 0) && ((ano % 100)!= 0) || ((ano % 400) == 0))) {
+                printf("Data Correta\n");
+            }else if ((dia <= 28) && (mes == 2)){
+                printf("Data Correta\n");
+            }else if ((dia <= 30) && (mes == 4 || mes == 6 || mes == 9 || mes == 11)) {
+                printf("Data Correta\n");
+            }else if ((dia <=31) && (mes == 1 || mes == 3 || mes == 5 || mes == 7 || mes ==8 || mes == 10 || mes == 12)){
+                printf("Data Correta\n");
+            }else{
+                printf("Data Incorreta\n");
+                printf("Exclua a usina de CNPJ:%s\n",N.cnpj);
+                exclui_usina(n);
+            }
+        }else{
+            printf("Data Incorreta\n");
+            printf("Exclua a usina de CNPJ:%s\n",N.cnpj);
+            exclui_usina(n);
+        }
+        //Validação da potencia 
+        if(N.potencia_estimada<=0){
+            printf("Potencia incorreta\n");
+            printf("Exclua a usina de CNPJ:%s\n",N.cnpj);
+            exclui_usina(n);
+        }
+        fclose(usinas);
+        fclose(copia);
+        main();
+    }
+}
+void verifica_consumidor(int n){
+//Abertura das variaveis structs, variaveis e arquivos
+  struct pessoa P;
+  int icpf[12];  
+  int somador=0,digito1,result1,result2,digito2,valor;
+  int sm, i, r, num, mult;
+  char dig13, dig14;
+  int c;
+  int digit,cont;
+  cont=0;
+  FILE*pessoas;
+  pessoas=fopen("pessoas_cadastradas.txt","r+");
+  rewind(pessoas); 
+  //Aqui seram lidos os valores cadastrados, verificando se o id é um cpf ou cnpj, o validando em sequência. Se invalido o indicando e redirecionando para a exclusão
+  while(!feof(pessoas)){
+    printf("Verificando...\n");
+    fscanf(pessoas,"%s\n",P.id);
+    fscanf(pessoas,"%s\n",P.nome);
+    for(i=0;i==strlen(P.id);i++) {
+        if (P.id[i] == '0'){
+            cont=cont+1;
+        }
+    }
+    c=strlen(P.id);
+    digit=c+cont;
+    if(c==14){
+        printf("E CNPJ\n");
+        sm = 0; mult = 2;
+        for (i=11; i>=0; i--) {
+            num = P.id[i] - 48;	
+            sm = sm + (num * mult);
+            mult = mult + 1;
+            if (mult == 10){
+                mult = 2;
+            }
+        }
+         r = sm % 11;
+        if ((r == 0) || (r == 1)){
+            dig13 = '0';
+        }else{
+            dig13 = (11 - r) + 48;
+        }
+        sm = 0; mult = 2;
+        for (i=12; i>=0; i--) {
+            num = P.id[i] - 48;
+            sm = sm + (num * mult);
+            mult = mult + 1;
+            if (mult == 10){
+                mult = 2;
+            }  
+        }
+         r = sm % 11;
+        if ((r == 0) || (r == 1)){
+            dig14 = '0';
+        }else{
+            dig14 = (11 - r) + 48;
+        }
+        if ((dig13 == P.id[12]) && (dig14 == P.id[13])){
+            printf("O CNPJ informado eh válido.\n");
+        }else{
+            printf("O CNPJ informado eh inválido.\n");
+            printf("Exclua o consumidor de CNPJ:%s\n",P.id);
+            exclui_consumidor(n);
+        }
+    }else if(c==11){
+        i=0;
+        printf("E CPF\n");
+        for(i=0;i<11;i++){  
+            icpf[i]=P.id[i]-48;  
+        }  
+        for(i=0;i<9;i++){  
+            somador+=icpf[i]*(10-i);  
+        }  
+        result1=somador%11;  
+        if( (result1==0) || (result1==1) ){  
+            digito1=0;  
+        }else{  
+            digito1 = 11-result1;  
+        }  
+        somador=0;  
+        for(i=0;i<10;i++){  
+            somador+=icpf[i]*(11-i);  
+        }  
+        valor=(somador/11)*11;  
+        result2=somador-valor;  
+        if( (result2==0) || (result2==1) ){  
+            digito2=0;  
+        }else{  
+            digito2=11-result2;  
+        }  
+        if((digito1==icpf[9]) && (digito2==icpf[10])){  
+            printf("\nCPF valido.\n");
+        }else{  
+            printf("CPF invalido.\n"); 
+            printf("Exclua o consumidor de CNPJ:%s\n",P.id);
+            exclui_consumidor(n);
+        }  
+    }  
+    }
+  } 
+void verifica_contrato(int n){
+//Abertura das variaveis structs, variaveis e arquivos
+    struct contrato C;
+    FILE*contratos;
+    int icpf[12];  
+    int somador=0,digito1,result1,result2,digito2,valor;
+    int sm, i, r, num, mult;
+    char dig13, dig14;
+    int cont,c,digit;
+    int vdata,vcnpj,viguais,vpotencia;
+    int dia,mes,ano,a;
+    char cnpj_1[TAM_CNPJCONTRATO],cnpj_potencia[TAM_CNPJCONTRATO];
+    a=0;
+    cont=0;
+    char data[TAM_DATA];
+    printf("Verificando Dados\n");
+    contratos=fopen("contratos_cadastrados.txt","r+");
+    rewind(contratos);
+    //Aqui seram lidos os valores cadastrados, verificando se estão ou não corretos, indicando o cnpj do valor indevido e o direcionando para exclusão desse
+    while(!feof(contratos)){
+        fscanf(contratos,"%s\n",C.cnpj_usina);
+        fscanf(contratos,"%s\n",C.id_consumidor);
+        fscanf(contratos,"%s\n",C.data_iniciocontrato);
+        fscanf(contratos,"%f\n",&C.potencia_contratada);
+        //Validação do CNPJ 
+        sm = 0; mult = 2;
+        for (i=11; i>=0; i--) {
+            num = C.cnpj_usina[i] - 48;
+            sm = sm + (num * mult);
+            mult = mult + 1;
+            if (mult == 10){
+                mult = 2;
+            }
+        }
+         r = sm % 11;
+        if ((r == 0) || (r == 1)){
+            dig13 = '0';
+        }else{
+            dig13 = (11 - r) + 48;
+        }
+        sm = 0; mult = 2;
+        for (i=12; i>=0; i--) {
+            num = C.cnpj_usina[i] - 48;
+            sm = sm + (num * mult);
+            mult = mult + 1;
+            if (mult == 10){
+                mult = 2;
+            }  
+        }
+         r = sm % 11;
+        if ((r == 0) || (r == 1)){
+            dig14 = '0';
+        }else{
+            dig14 = (11 - r) + 48;
+        }
+        if ((dig13 == C.cnpj_usina[12]) && (dig14 == C.cnpj_usina[13])){
+            printf("O CNPJ informado eh válido.\n");
+        }else{
+            printf("O CNPJ informado eh inválido.\n");
+            printf("Exclua a usina de CNPJ:%s\n",C.cnpj_usina);
+            exclui_contrato();
+        }
+        //Validação do id
+        printf("Verificando...\n");
+    for(i=0;i==strlen(C.id_consumidor);i++) {
+        if (C.id_consumidor[i] == '0'){
+            cont=cont+1;
+        }
+    }
+    c=strlen(C.id_consumidor);
+    printf("ID:%s\n",C.id_consumidor);
+    digit=c+cont;
+    printf("Numero de digitos:%d\n",c);
+    if(c==14){
+        printf("E CNPJ\n");
+        sm = 0; mult = 2;
+        for (i=11; i>=0; i--) {
+            num = C.id_consumidor[i] - 48;	
+            sm = sm + (num * mult);
+            mult = mult + 1;
+            if (mult == 10){
+                mult = 2;
+            }
+        }
+         r = sm % 11;
+        if ((r == 0) || (r == 1)){
+            dig13 = '0';
+        }else{
+            dig13 = (11 - r) + 48;
+        }
+        sm = 0; mult = 2;
+        for (i=12; i>=0; i--) {
+            num = C.id_consumidor[i] - 48;
+            sm = sm + (num * mult);
+            mult = mult + 1;
+            if (mult == 10){
+                mult = 2;
+            }  
+        }
+         r = sm % 11;
+        if ((r == 0) || (r == 1)){
+            dig14 = '0';
+        }else{
+            dig14 = (11 - r) + 48;
+        }
+        if ((dig13 == C.id_consumidor[12]) && (dig14 == C.id_consumidor[13])){
+            printf("O CNPJ informado eh válido.\n");
+        }else{
+            printf("O CNPJ informado eh inválido.\n");
+            printf("Exclua o consumidor de CNPJ:%s\n",C.id_consumidor);
+            exclui_consumidor(n);
+        }
+    }else if(c==11){
+        i=0;
+        printf("E CPF\n");
+        for(i=0;i<11;i++){  
+            icpf[i]=C.id_consumidor[i]-48;  
+        }  
+        for(i=0;i<9;i++){  
+            somador+=icpf[i]*(10-i);  
+        }  
+        result1=somador%11;  
+        if( (result1==0) || (result1==1) ){  
+            digito1=0;  
+        }else{  
+            digito1 = 11-result1;  
+        }  
+        somador=0;  
+        for(i=0;i<10;i++){  
+            somador+=icpf[i]*(11-i);  
+        }  
+        valor=(somador/11)*11;  
+        result2=somador-valor;  
+        if( (result2==0) || (result2==1) ){  
+            digito2=0;  
+        }else{  
+            digito2=11-result2;  
+        }  
+        if((digito1==icpf[9]) && (digito2==icpf[10])){  
+            printf("\nCPF valido\n");
+        }else{  
+            printf("CPF invalido\n"); 
+            printf("Exclua o consumidor de CNPJ:%s\n",C.id_consumidor);
+            exclui_consumidor(n);
+        }  
+    }  
+        //Validação da data 
+        i=0;
+        dia=atoi(C.data_iniciocontrato);
+        mes=atoi(C.data_iniciocontrato+3);
+        ano=atoi(C.data_iniciocontrato+6);
+        printf("%d/%d/%d\n",dia,mes,ano);
+         if ((dia >= 1 && dia <= 31) && (mes >= 1 && mes <= 12) && (ano >= 1985 && ano <= 2022)){
+            if ((dia == 29 && mes == 2) && (((ano % 4) == 0) && ((ano % 100)!= 0) || ((ano % 400) == 0))) {
+                printf("Data Correta\n");
+            }else if ((dia <= 28) && (mes == 2)){
+                printf("Data Correta\n");
+            }else if ((dia <= 30) && (mes == 4 || mes == 6 || mes == 9 || mes == 11)) {
+                printf("Data Correta\n");
+            }else if ((dia <=31) && (mes == 1 || mes == 3 || mes == 5 || mes == 7 || mes ==8 || mes == 10 || mes == 12)){
+                printf("Data Correta\n");
+            }else{
+                printf("Data Incorreta\n");
+                printf("Exclua a usina de CNPJ:%s\n",C.cnpj_usina);
+                exclui_contrato();
+            }
+        }else{
+            printf("Data Incorreta\n");
+            printf("Exclua a usina de CNPJ:%s\n",C.cnpj_usina);
+            exclui_contrato();
+        }
+        //Validação da Potencia
+        if(C.potencia_contratada<=0){
+            printf("Potencia incorreta\n");
+            printf("Exclua a usina de CNPJ:%s\n",C.cnpj_usina);
+            exclui_contrato();
+        }
+        fclose(contratos);
+    }
+    main();
+}
